@@ -3,12 +3,12 @@ const LS_PREFIX = "BudgetApp_";
 const LS_INCOMES = LS_PREFIX + "incomes";
 const LS_UTILITIES = LS_PREFIX + "utilities";
 const LS_BUDGETS = LS_PREFIX + "budgets";
-const LS_HISTORY = LS_PREFIX + "history"; // Unified history
+const LS_HISTORY = LS_PREFIX + "history";
 
 // Data Arrays
 let incomes = [], utilityExpenses = [], budgetCategories = [], history = [];
 
-// Load Data
+// Load Data from Local Storage
 function loadData() {
     incomes = JSON.parse(localStorage.getItem(LS_INCOMES)) || [];
     utilityExpenses = JSON.parse(localStorage.getItem(LS_UTILITIES)) || [];
@@ -16,7 +16,7 @@ function loadData() {
     history = JSON.parse(localStorage.getItem(LS_HISTORY)) || [];
 }
 
-// Save Data
+// Save Data to Local Storage
 function saveData() {
     localStorage.setItem(LS_INCOMES, JSON.stringify(incomes));
     localStorage.setItem(LS_UTILITIES, JSON.stringify(utilityExpenses));
@@ -131,7 +131,6 @@ document.getElementById("budget-form").addEventListener("submit", function(e) {
     if (!isNaN(value) && value > 0) {
         const newBudget = {
             id: Date.now(),
-            type: "Budget",
             name,
             allocated: value,
             spent: 0,
