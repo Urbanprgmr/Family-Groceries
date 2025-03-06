@@ -1,179 +1,215 @@
-// Unique localStorage keys
-const LS_PREFIX = "BudgetApp_";
-const LS_INCOMES = LS_PREFIX + "incomes";
-const LS_UTILITIES = LS_PREFIX + "utilities";
-const LS_BUDGETS = LS_PREFIX + "budgets";
-const LS_HISTORY = LS_PREFIX + "history";
+// app.js
+let incomes = [];
+let budgets = [];
+let expenses = [];
+let editIndex = null;
+let editType = null;
 
-// Data Arrays
-let incomes = [], utilityExpenses = [], budgetCategories = [], history = [];
+// Load data on page load
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  updateSummary();
+  updateHistory();
+  updateBudgetList();
+  updateExpenseCategories();
+});
 
-// Load Data from Local Storage
-function loadData() {
-    incomes = JSON.parse(localStorage.getItem(LS_INCOMES)) || [];
-    utilityExpenses = JSON.parse(localStorage.getItem(LS_UTILITIES)) || [];
-    budgetCategories = JSON.parse(localStorage.getItem(LS_BUDGETS)) || [];
-    history = JSON.parse(localStorage.getItem(LS_HISTORY)) || [];
-}
-
-// Save Data to Local Storage
+// Save data to local storage
 function saveData() {
-    localStorage.setItem(LS_INCOMES, JSON.stringify(incomes));
-    localStorage.setItem(LS_UTILITIES, JSON.stringify(utilityExpenses));
-    localStorage.setItem(LS_BUDGETS, JSON.stringify(budgetCategories));
-    localStorage.setItem(LS_HISTORY, JSON.stringify(history));
+  localStorage.setItem('incomes', JSON.stringify(incomes));
+  localStorage.setItem('budgets', JSON.stringify(budgets));
+  localStorage.setItem('expenses', JSON.stringify(expenses));
 }
 
-// Recalculate Totals
-function recalculateTotals() {
-    const totalIncome = incomes.reduce((sum, inc) => sum + inc.amount, 0);
-    const totalUtility = utilityExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-    let totalBudgetExpenses = 0;
-
-    budgetCategories.forEach(cat => {
-        cat.spent = cat.expenses.reduce((sum, exp) => sum + exp.amount, 0);
-        cat.remaining = cat.allocated - cat.spent;
-        totalBudgetExpenses += cat.spent;
-    });
-
-    const totalExpenses = totalUtility + totalBudgetExpenses;
-    const balance = totalIncome - totalExpenses;
-
-    return { totalIncome, totalUtility, totalBudgetExpenses, totalExpenses, balance };
+// Load data from local storage
+function loadData() {
+  incomes = JSON.parse(localStorage.getItem('incomes')) || [];
+  budgets = JSON.parse(localStorage.getItem('budgets')) || [];
+  expenses = JSON.parse(localStorage.getItem('expenses')) || [];
 }
 
-// Update UI
-function updateUI() {
-    const totals = recalculateTotals();
-
-    document.getElementById("total-income").textContent = totals.totalIncome.toFixed(2);
-    document.getElementById("total-expenses").textContent = totals.totalExpenses.toFixed(2);
-    document.getElementById("balance").textContent = totals.balance.toFixed(2);
-
-    // Update Budget Categories List
-    const budgetsListEl = document.getElementById("budgets-list");
-    budgetsListEl.innerHTML = budgetCategories.length === 0
-        ? "<li class='empty'>No budgets set.</li>"
-        : budgetCategories.map(cat => `
-            <li>
-                <div><strong>${cat.name}</strong></div>
-                <div>Assigned: MVR ${cat.allocated.toFixed(2)}</div>
-                <div>Used: MVR ${cat.spent.toFixed(2)}</div>
-                <div>Remaining: MVR ${cat.remaining.toFixed(2)}</div>
-                <div class="budget-bar-container">
-                    <div class="budget-bar" style="width: ${Math.max((cat.remaining / cat.allocated) * 100, 0)}%"></div>
-                </div>
-                <button class="tiny-btn" onclick="editBudget(${cat.id})">✏</button>
-                <button class="tiny-btn" onclick="deleteBudget(${cat.id})">🗑</button>
-            </li>
-        `).join("");
-
-    // Update Budget Category Selection in Expense Form
-    const expenseCategorySelect = document.getElementById("expense-category");
-    expenseCategorySelect.innerHTML = budgetCategories.length
-        ? budgetCategories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join("")
-        : `<option disabled selected>No budgets available</option>`;
-
-    // Update Activity History (Now Fully Functional)
-    const historyListEl = document.getElementById("history-list");
-    historyListEl.innerHTML = history.length === 0
-        ? "<li class='empty'>No history records yet.</li>"
-        : history.map(entry => `
-            <li>
-                <div>
-                    <strong>${entry.type}</strong> - ${entry.desc}  
-                    <br>Amount: <strong>MVR ${entry.amount.toFixed(2)}</strong>  
-                    <br><small>${entry.timestamp}</small>
-                </div>
-                <button class="tiny-btn" onclick="deleteHistory(${entry.id})">🗑</button>
-            </li>
-        `).join("");
-
-    saveData();
+// Add income
+document.getElementById('income-form').addEventListener('submit', addIncome);
+function addIncome(e) {
+  e.preventDefault();
+  const description = document.getElementById('income-description').value;
+  const amount = parseFloat(document.getElementById('income-amount').value);
+  incomes.push({ description, amount });
+  saveData();
+  updateSummary();
+  updateHistory();
+  e.target.reset();
 }
 
-// Add Income
-document.getElementById("income-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const amount = parseFloat(document.getElementById("income-amount").value);
-    const desc = document.getElementById("income-desc").value.trim();
-
-    if (!isNaN(amount) && amount > 0) {
-        const newIncome = { id: Date.now(), type: "Income", amount, desc, timestamp: new Date().toLocaleString() };
-        incomes.push(newIncome);
-        history.push(newIncome);
-        saveData();
-        updateUI();
-    }
-});
-
-// Add Utility Expense
-document.getElementById("utility-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const amount = parseFloat(document.getElementById("utility-amount").value);
-    const desc = document.getElementById("utility-desc").value.trim();
-
-    if (!isNaN(amount) && amount > 0) {
-        const newExpense = { id: Date.now(), type: "Utility Expense", amount, desc, timestamp: new Date().toLocaleString() };
-        utilityExpenses.push(newExpense);
-        history.push(newExpense);
-        saveData();
-        updateUI();
-    }
-});
-
-// Add Budget Category
-document.getElementById("budget-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const name = document.getElementById("budget-name").value.trim();
-    const value = parseFloat(document.getElementById("budget-value").value);
-
-    if (!isNaN(value) && value > 0) {
-        const newBudget = {
-            id: Date.now(),
-            name,
-            allocated: value,
-            spent: 0,
-            remaining: value,
-            expenses: [],
-            desc: `Budget Created: ${name}`,
-            timestamp: new Date().toLocaleString()
-        };
-        budgetCategories.push(newBudget);
-        history.push(newBudget);
-        saveData();
-        updateUI();
-    }
-});
-
-// Add Budget Expense
-document.getElementById("budget-expense-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const budgetId = document.getElementById("expense-category").value;
-    const amount = parseFloat(document.getElementById("expense-amount").value);
-    const desc = document.getElementById("expense-desc").value.trim();
-
-    if (!isNaN(amount) && amount > 0) {
-        const budget = budgetCategories.find(b => b.id == budgetId);
-        if (budget) {
-            const newExpense = { id: Date.now(), type: "Budget Expense", amount, desc, timestamp: new Date().toLocaleString() };
-            budget.expenses.push(newExpense);
-            budget.spent += amount;
-            budget.remaining -= amount;
-            history.push({ ...newExpense, desc: `Expense in ${budget.name}: ${desc}` });
-            saveData();
-            updateUI();
-        }
-    }
-});
-
-// Delete History Entry
-function deleteHistory(id) {
-    history = history.filter(h => h.id !== id);
-    saveData();
-    updateUI();
+// Set budget
+document.getElementById('budget-form').addEventListener('submit', setBudget);
+function setBudget(e) {
+  e.preventDefault();
+  const category = document.getElementById('budget-category').value;
+  const amount = parseFloat(document.getElementById('budget-amount').value);
+  budgets.push({ category, amount, remaining: amount });
+  saveData();
+  updateBudgetList();
+  updateExpenseCategories();
+  e.target.reset();
 }
 
-// Initialize App
-loadData();
-updateUI();
+// Add expense
+document.getElementById('expense-form').addEventListener('submit', addExpense);
+function addExpense(e) {
+  e.preventDefault();
+  const description = document.getElementById('expense-description').value;
+  const amount = parseFloat(document.getElementById('expense-amount').value);
+  const category = document.getElementById('expense-category').value;
+
+  if (category !== 'uncategorized') {
+    const budget = budgets.find(b => b.category === category);
+    if (budget) {
+      budget.remaining -= amount;
+    }
+  }
+
+  expenses.push({ description, amount, category });
+  saveData();
+  updateSummary();
+  updateHistory();
+  updateBudgetList();
+  e.target.reset();
+}
+
+// Edit entry
+function editEntry(button) {
+  const row = button.parentElement.parentElement;
+  const index = row.rowIndex - 1; // Adjust for header row
+  const type = row.cells[0].textContent;
+
+  editIndex = index;
+  editType = type;
+
+  const modal = document.getElementById('edit-modal');
+  const form = document.getElementById('edit-form');
+
+  if (type === 'Income') {
+    form.querySelector('#edit-description').value = incomes[index].description;
+    form.querySelector('#edit-amount').value = incomes[index].amount;
+    form.querySelector('#edit-category').style.display = 'none';
+  } else if (type === 'Expense') {
+    form.querySelector('#edit-description').value = expenses[index - incomes.length].description;
+    form.querySelector('#edit-amount').value = expenses[index - incomes.length].amount;
+    form.querySelector('#edit-category').value = expenses[index - incomes.length].category;
+    form.querySelector('#edit-category').style.display = 'block';
+  }
+
+  modal.style.display = 'flex';
+}
+
+// Save edited entry
+document.getElementById('edit-form').addEventListener('submit', saveEdit);
+function saveEdit(e) {
+  e.preventDefault();
+  const description = document.getElementById('edit-description').value;
+  const amount = parseFloat(document.getElementById('edit-amount').value);
+  const category = document.getElementById('edit-category').value;
+
+  if (editType === 'Income') {
+    incomes[editIndex] = { description, amount };
+  } else if (editType === 'Expense') {
+    expenses[editIndex - incomes.length] = { description, amount, category };
+  }
+
+  saveData();
+  updateSummary();
+  updateHistory();
+  updateBudgetList();
+  closeModal();
+}
+
+// Close modal
+document.querySelector('.close').addEventListener('click', closeModal);
+function closeModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+
+// Delete entry
+function deleteEntry(button) {
+  const row = button.parentElement.parentElement;
+  const index = row.rowIndex - 1; // Adjust for header row
+  const type = row.cells[0].textContent;
+
+  if (type === 'Income') {
+    incomes.splice(index, 1);
+  } else if (type === 'Expense') {
+    expenses.splice(index - incomes.length, 1);
+  }
+
+  saveData();
+  updateSummary();
+  updateHistory();
+  updateBudgetList();
+}
+
+// Update summary
+function updateSummary() {
+  const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
+  const totalBudgetedExpenses = budgets.reduce((sum, budget) => sum + (budget.amount - budget.remaining), 0);
+  const totalUncategorizedExpenses = expenses
+    .filter(expense => expense.category === 'uncategorized')
+    .reduce((sum, expense) => sum + expense.amount, 0);
+  const remainingBalance = totalIncome - totalBudgetedExpenses - totalUncategorizedExpenses;
+
+  document.getElementById('total-income').textContent = totalIncome.toFixed(2);
+  document.getElementById('total-budgeted-expenses').textContent = totalBudgetedExpenses.toFixed(2);
+  document.getElementById('total-uncategorized-expenses').textContent = totalUncategorizedExpenses.toFixed(2);
+  document.getElementById('remaining-balance').textContent = remainingBalance.toFixed(2);
+}
+
+// Update budget list
+function updateBudgetList() {
+  const budgetList = document.getElementById('budget-list');
+  budgetList.innerHTML = budgets.map(budget => `
+    <div class="budget-item">
+      <strong>${budget.category}</strong>
+      <p>Total: $${budget.amount.toFixed(2)} | Remaining: $${budget.remaining.toFixed(2)}</p>
+      <div class="progress-bar">
+        <div class="progress" style="width: ${(budget.remaining / budget.amount) * 100}%"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Update expense categories dropdown
+function updateExpenseCategories() {
+  const expenseCategory = document.getElementById('expense-category');
+  expenseCategory.innerHTML = '<option value="uncategorized">Uncategorized</option>' +
+    budgets.map(budget => `<option value="${budget.category}">${budget.category}</option>`).join('');
+}
+
+// Update history table
+function updateHistory() {
+  const historyTable = document.getElementById('history-table').getElementsByTagName('tbody')[0];
+  historyTable.innerHTML = '';
+
+  incomes.forEach(income => {
+    addHistoryRow('Income', income.description, income.amount, '');
+  });
+
+  expenses.forEach(expense => {
+    addHistoryRow('Expense', expense.description, expense.amount, expense.category);
+  });
+}
+
+// Add a row to the history table
+function addHistoryRow(type, description, amount, category) {
+  const historyTable = document.getElementById('history-table').getElementsByTagName('tbody')[0];
+  const row = historyTable.insertRow();
+  row.innerHTML = `
+    <td>${type}</td>
+    <td>${description}</td>
+    <td>${amount.toFixed(2)}</td>
+    <td>${category}</td>
+    <td class="actions">
+      <button class="edit" onclick="editEntry(this)">Edit</button>
+      <button onclick="deleteEntry(this)">Delete</button>
+    </td>
+  `;
+}
