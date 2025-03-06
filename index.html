@@ -10,12 +10,23 @@
   <div class="container">
     <h1>Expense Tracker</h1>
 
+    <!-- Summary Section at the Top -->
+    <section class="card summary">
+      <h2>Summary</h2>
+      <div class="summary-grid">
+        <p>Total Income: <span id="total-income">0 MVR</span></p>
+        <p>Total Budgeted Expenses: <span id="total-budgeted-expenses">0 MVR</span></p>
+        <p>Total Uncategorized Expenses: <span id="total-uncategorized-expenses">0 MVR</span></p>
+        <p>Remaining Balance: <span id="remaining-balance">0 MVR</span></p>
+      </div>
+    </section>
+
     <!-- Income Section -->
     <section class="card">
       <h2>Add Income</h2>
       <form id="income-form">
         <input type="text" id="income-description" placeholder="Description" required>
-        <input type="number" id="income-amount" placeholder="Amount" required>
+        <input type="number" id="income-amount" placeholder="Amount in MVR" required>
         <button type="submit">Add Income</button>
       </form>
     </section>
@@ -25,7 +36,7 @@
       <h2>Set Budget</h2>
       <form id="budget-form">
         <input type="text" id="budget-category" placeholder="Category" required>
-        <input type="number" id="budget-amount" placeholder="Amount" required>
+        <input type="number" id="budget-amount" placeholder="Amount in MVR" required>
         <button type="submit">Set Budget</button>
       </form>
       <div id="budget-list"></div>
@@ -36,7 +47,7 @@
       <h2>Add Expense</h2>
       <form id="expense-form">
         <input type="text" id="expense-description" placeholder="Description" required>
-        <input type="number" id="expense-amount" placeholder="Amount" required>
+        <input type="number" id="expense-amount" placeholder="Amount in MVR" required>
         <select id="expense-category">
           <option value="uncategorized">Uncategorized</option>
         </select>
@@ -62,17 +73,6 @@
         </tbody>
       </table>
     </section>
-
-    <!-- Summary Section -->
-    <section class="card">
-      <h2>Summary</h2>
-      <div class="summary-grid">
-        <p>Total Income: <span id="total-income">0</span></p>
-        <p>Total Budgeted Expenses: <span id="total-budgeted-expenses">0</span></p>
-        <p>Total Uncategorized Expenses: <span id="total-uncategorized-expenses">0</span></p>
-        <p>Remaining Balance: <span id="remaining-balance">0</span></p>
-      </div>
-    </section>
   </div>
 
   <!-- Edit Modal -->
@@ -82,7 +82,7 @@
       <h2>Edit Entry</h2>
       <form id="edit-form">
         <input type="text" id="edit-description" placeholder="Description" required>
-        <input type="number" id="edit-amount" placeholder="Amount" required>
+        <input type="number" id="edit-amount" placeholder="Amount in MVR" required>
         <select id="edit-category">
           <option value="uncategorized">Uncategorized</option>
         </select>
