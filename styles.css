@@ -50,8 +50,65 @@ h1, h2 {
   gap: 10px;
 }
 
-.budget {
+.budget-categories {
   background-color: #3a3a5a;
+}
+
+.budget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.budget-item {
+  background-color: #444;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.budget-item h3 {
+  margin: 0 0 10px 0;
+  color: var(--text-color);
+}
+
+.budget-item p {
+  margin: 5px 0;
+  color: var(--text-color);
+}
+
+.progress-bar {
+  background-color: #555;
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progress {
+  background-color: var(--primary-color);
+  height: 10px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.actions button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  color: white;
+  cursor: pointer;
+}
+
+.actions button.edit {
+  background-color: var(--secondary-color);
+}
+
+.actions button.delete {
+  background-color: var(--danger-color);
 }
 
 .income {
@@ -90,47 +147,6 @@ button {
 
 button:hover {
   opacity: 0.9;
-}
-
-#budget-list {
-  display: grid;
-  gap: 10px;
-}
-
-.budget-item {
-  background-color: #444;
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: var(--shadow);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.budget-item .actions button {
-  margin: 0 5px;
-  padding: 5px 10px;
-  background-color: var(--danger-color);
-  border: none;
-  border-radius: 3px;
-  color: white;
-  cursor: pointer;
-}
-
-.budget-item .actions button.edit {
-  background-color: var(--secondary-color);
-}
-
-.progress-bar {
-  background-color: #555;
-  border-radius: 5px;
-  overflow: hidden;
-  margin: 10px 0;
-}
-
-.progress {
-  background-color: var(--primary-color);
-  height: 10px;
 }
 
 table {
