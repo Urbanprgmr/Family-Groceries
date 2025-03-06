@@ -3,77 +3,94 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Expense & Budget Tracker</title>
+  <title>Expense Tracker</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <h1>Expense & Budget Tracker</h1>
-    
+    <h1>Expense Tracker</h1>
+
+    <!-- Income Section -->
+    <section class="card">
+      <h2>Add Income</h2>
+      <form id="income-form">
+        <input type="text" id="income-description" placeholder="Description" required>
+        <input type="number" id="income-amount" placeholder="Amount" required>
+        <button type="submit">Add Income</button>
+      </form>
+    </section>
+
+    <!-- Budget Section -->
+    <section class="card">
+      <h2>Set Budget</h2>
+      <form id="budget-form">
+        <input type="text" id="budget-category" placeholder="Category" required>
+        <input type="number" id="budget-amount" placeholder="Amount" required>
+        <button type="submit">Set Budget</button>
+      </form>
+      <div id="budget-list"></div>
+    </section>
+
+    <!-- Expenses Section -->
+    <section class="card">
+      <h2>Add Expense</h2>
+      <form id="expense-form">
+        <input type="text" id="expense-description" placeholder="Description" required>
+        <input type="number" id="expense-amount" placeholder="Amount" required>
+        <select id="expense-category">
+          <option value="uncategorized">Uncategorized</option>
+        </select>
+        <button type="submit">Add Expense</button>
+      </form>
+    </section>
+
+    <!-- History Section -->
+    <section class="card">
+      <h2>History</h2>
+      <table id="history-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be added dynamically -->
+        </tbody>
+      </table>
+    </section>
+
     <!-- Summary Section -->
-    <div id="summary">
-      <div class="summary-item">Total Income: MVR <span id="total-income">0.00</span></div>
-      <div class="summary-item">Total Expenses: MVR <span id="total-expenses">0.00</span></div>
-      <div class="summary-item">Balance: MVR <span id="balance">0.00</span></div>
-    </div>
-    
-    <!-- Restore Local Storage -->
-    <button id="restore-storage">Restore Data</button>
-
-    <!-- Forms Section -->
-    <div class="forms-container">
-      <div class="form-col">
-        <h3>Add Income</h3>
-        <form id="income-form">
-          <input type="number" id="income-amount" placeholder="Amount (MVR)" required>
-          <input type="text" id="income-desc" placeholder="Description (optional)">
-          <button type="submit">Add Income</button>
-        </form>
+    <section class="card">
+      <h2>Summary</h2>
+      <div class="summary-grid">
+        <p>Total Income: <span id="total-income">0</span></p>
+        <p>Total Budgeted Expenses: <span id="total-budgeted-expenses">0</span></p>
+        <p>Total Uncategorized Expenses: <span id="total-uncategorized-expenses">0</span></p>
+        <p>Remaining Balance: <span id="remaining-balance">0</span></p>
       </div>
+    </section>
+  </div>
 
-      <div class="form-col">
-        <h3>Add Utility Expense</h3>
-        <form id="utility-form">
-          <input type="number" id="utility-amount" placeholder="Amount (MVR)" required>
-          <input type="text" id="utility-desc" placeholder="Utility Name">
-          <button type="submit">Add Expense</button>
-        </form>
-      </div>
-
-      <div class="form-col">
-        <h3>Set Budget</h3>
-        <form id="budget-form">
-          <input type="text" id="budget-name" placeholder="Category Name" required>
-          <div class="budget-type-options">
-            <label><input type="radio" name="budget-type" value="fixed" checked> Fixed Amount</label>
-            <label><input type="radio" name="budget-type" value="percent"> % of Remaining</label>
-          </div>
-          <input type="number" id="budget-value" placeholder="Enter amount or %" required>
-          <button type="submit">Add Budget</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Budget Categories -->
-    <h2>Budget Categories</h2>
-    <ul id="budgets-list"></ul>
-
-    <!-- Budget Expense Form -->
-    <h3>Add Expense to Budget</h3>
-    <form id="budget-expense-form">
-      <select id="expense-category"></select>
-      <input type="number" id="expense-amount" placeholder="Amount (MVR)" required>
-      <input type="text" id="expense-desc" placeholder="Description (optional)">
-      <button type="submit">Add Expense</button>
-    </form>
-
-    <!-- Unified Data History Section -->
-    <div id="history">
-      <h2>Activity History</h2>
-      <ul id="history-list"></ul>
+  <!-- Edit Modal -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Edit Entry</h2>
+      <form id="edit-form">
+        <input type="text" id="edit-description" placeholder="Description" required>
+        <input type="number" id="edit-amount" placeholder="Amount" required>
+        <select id="edit-category">
+          <option value="uncategorized">Uncategorized</option>
+        </select>
+        <button type="submit">Save Changes</button>
+      </form>
     </div>
   </div>
-  
-  <script src="script.js"></script>
+
+  <script src="app.js"></script>
 </body>
 </html>
