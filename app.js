@@ -34,7 +34,8 @@ function addIncome(e) {
   e.preventDefault();
   const description = document.getElementById('income-description').value;
   const amount = parseFloat(document.getElementById('income-amount').value);
-  incomes.push({ description, amount });
+  const timestamp = new Date().toLocaleString(); // Add timestamp
+  incomes.push({ description, amount, timestamp });
   saveData();
   updateSummary();
   updateHistory();
@@ -69,6 +70,7 @@ function addExpense(e) {
   const description = document.getElementById('expense-description').value;
   const amount = parseFloat(document.getElementById('expense-amount').value);
   const category = document.getElementById('expense-category').value;
+  const timestamp = new Date().toLocaleString(); // Add timestamp
 
   if (category !== 'uncategorized') {
     const budget = budgets.find(b => b.category === category);
@@ -77,7 +79,7 @@ function addExpense(e) {
     }
   }
 
-  expenses.push({ description, amount, category });
+  expenses.push({ description, amount, category, timestamp });
   saveData();
   updateSummary();
   updateHistory();
@@ -162,16 +164,16 @@ function updateHistory() {
   historyTable.innerHTML = '';
 
   incomes.forEach(income => {
-    addHistoryRow('Income', income.description, income.amount, '');
+    addHistoryRow('Income', income.description, income.amount, '', income.timestamp);
   });
 
   expenses.forEach(expense => {
-    addHistoryRow('Expense', expense.description, expense.amount, expense.category);
+    addHistoryRow('Expense', expense.description, expense.amount, expense.category, expense.timestamp);
   });
 }
 
 // Add a row to the history table
-function addHistoryRow(type, description, amount, category) {
+function addHistoryRow(type, description, amount, category, timestamp) {
   const historyTable = document.getElementById('history-table').getElementsByTagName('tbody')[0];
   const row = historyTable.insertRow();
   row.innerHTML = `
@@ -179,6 +181,7 @@ function addHistoryRow(type, description, amount, category) {
     <td>${description}</td>
     <td>${amount.toFixed(2)} MVR</td>
     <td>${category}</td>
+    <td>${timestamp}</td>
     <td class="actions">
       <button class="edit" onclick="editEntry(this)">Edit</button>
       <button onclick="deleteEntry(this)">Delete</button>
@@ -221,9 +224,9 @@ function saveEdit(e) {
   const category = document.getElementById('edit-category').value;
 
   if (editType === 'Income') {
-    incomes[editIndex] = { description, amount };
+    incomes[editIndex] = { description, amount, timestamp: incomes[editIndex].timestamp };
   } else if (editType === 'Expense') {
-    expenses[editIndex - incomes.length] = { description, amount, category };
+    expenses[editIndex - incomes.length] = { description, amount, category, timestamp: expenses[editIndex - incomes.length].timestamp };
   }
 
   saveData();
