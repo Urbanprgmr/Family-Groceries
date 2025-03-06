@@ -35,6 +35,21 @@ h1, h2 {
   margin-bottom: 20px;
 }
 
+.summary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.summary h2 {
+  color: white;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
 form {
   display: flex;
   flex-direction: column;
@@ -69,6 +84,23 @@ button:hover {
   padding: 15px;
   border-radius: 5px;
   box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.budget-item .actions button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  background-color: var(--danger-color);
+  border: none;
+  border-radius: 3px;
+  color: white;
+  cursor: pointer;
+}
+
+.budget-item .actions button.edit {
+  background-color: var(--secondary-color);
 }
 
 .progress-bar {
@@ -111,12 +143,6 @@ th {
 
 .actions button.edit {
   background-color: var(--secondary-color);
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
 }
 
 /* Modal Styles */
