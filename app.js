@@ -77,6 +77,104 @@ function addExpense(e) {
   e.target.reset();
 }
 
+// Edit budget
+function editBudget(index) {
+  const budget = budgets[index];
+  const newCategory = prompt('Enter new category:', budget.category);
+  const newAmount = parseFloat(prompt('Enter new amount:', budget.amount));
+
+  if (newCategory && !isNaN(newAmount)) {
+    budget.category = newCategory;
+    budget.amount = newAmount;
+    budget.remaining = newAmount - (budget.amount - budget.remaining);
+    saveData();
+    updateBudgetList();
+    updateExpenseCategories();
+  }
+}
+
+// Delete budget
+function deleteBudget(index) {
+  if (confirm('Are you sure you want to delete this budget?')) {
+    budgets.splice(index, 1);
+    saveData();
+    updateBudgetList();
+    updateExpenseCategories();
+  }
+}
+
+// Update summary
+function updateSummary() {
+  const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
+  const totalBudgetedExpenses = budgets.reduce((sum, budget) => sum + (budget.amount - budget.remaining), 0);
+  const totalUncategorizedExpenses = expenses
+    .filter(expense => expense.category === 'uncategorized')
+    .reduce((sum, expense) => sum + expense.amount, 0);
+  const remainingBalance = totalIncome - totalBudgetedExpenses - totalUncategorizedExpenses;
+
+  document.getElementById('total-income').textContent = `${totalIncome.toFixed(2)} MVR`;
+  document.getElementById('total-budgeted-expenses').textContent = `${totalBudgetedExpenses.toFixed(2)} MVR`;
+  document.getElementById('total-uncategorized-expenses').textContent = `${totalUncategorizedExpenses.toFixed(2)} MVR`;
+  document.getElementById('remaining-balance').textContent = `${remainingBalance.toFixed(2)} MVR`;
+}
+
+// Update budget list
+function updateBudgetList() {
+  const budgetList = document.getElementById('budget-list');
+  budgetList.innerHTML = budgets.map((budget, index) => `
+    <div class="budget-item">
+      <div>
+        <strong>${budget.category}</strong>
+        <p>Total: ${budget.amount.toFixed(2)} MVR | Remaining: ${budget.remaining.toFixed(2)} MVR</p>
+        <div class="progress-bar">
+          <div class="progress" style="width: ${(budget.remaining / budget.amount) * 100}%"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="edit" onclick="editBudget(${index})">Edit</button>
+        <button onclick="deleteBudget(${index})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Update expense categories dropdown
+function updateExpenseCategories() {
+  const expenseCategory = document.getElementById('expense-category');
+  expenseCategory.innerHTML = '<option value="uncategorized">Uncategorized</option>' +
+    budgets.map(budget => `<option value="${budget.category}">${budget.category}</option>`).join('');
+}
+
+// Update history table
+function updateHistory() {
+  const historyTable = document.getElementById('history-table').getElementsByTagName('tbody')[0];
+  historyTable.innerHTML = '';
+
+  incomes.forEach(income => {
+    addHistoryRow('Income', income.description, income.amount, '');
+  });
+
+  expenses.forEach(expense => {
+    addHistoryRow('Expense', expense.description, expense.amount, expense.category);
+  });
+}
+
+// Add a row to the history table
+function addHistoryRow(type, description, amount, category) {
+  const historyTable = document.getElementById('history-table').getElementsByTagName('tbody')[0];
+  const row = historyTable.insertRow();
+  row.innerHTML = `
+    <td>${type}</td>
+    <td>${description}</td>
+    <td>${amount.toFixed(2)} MVR</td>
+    <td>${category}</td>
+    <td class="actions">
+      <button class="edit" onclick="editEntry(this)">Edit</button>
+      <button onclick="deleteEntry(this)">Delete</button>
+    </td>
+  `;
+}
+
 // Edit entry
 function editEntry(button) {
   const row = button.parentElement.parentElement;
@@ -146,70 +244,4 @@ function deleteEntry(button) {
   updateSummary();
   updateHistory();
   updateBudgetList();
-}
-
-// Update summary
-function updateSummary() {
-  const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
-  const totalBudgetedExpenses = budgets.reduce((sum, budget) => sum + (budget.amount - budget.remaining), 0);
-  const totalUncategorizedExpenses = expenses
-    .filter(expense => expense.category === 'uncategorized')
-    .reduce((sum, expense) => sum + expense.amount, 0);
-  const remainingBalance = totalIncome - totalBudgetedExpenses - totalUncategorizedExpenses;
-
-  document.getElementById('total-income').textContent = totalIncome.toFixed(2);
-  document.getElementById('total-budgeted-expenses').textContent = totalBudgetedExpenses.toFixed(2);
-  document.getElementById('total-uncategorized-expenses').textContent = totalUncategorizedExpenses.toFixed(2);
-  document.getElementById('remaining-balance').textContent = remainingBalance.toFixed(2);
-}
-
-// Update budget list
-function updateBudgetList() {
-  const budgetList = document.getElementById('budget-list');
-  budgetList.innerHTML = budgets.map(budget => `
-    <div class="budget-item">
-      <strong>${budget.category}</strong>
-      <p>Total: $${budget.amount.toFixed(2)} | Remaining: $${budget.remaining.toFixed(2)}</p>
-      <div class="progress-bar">
-        <div class="progress" style="width: ${(budget.remaining / budget.amount) * 100}%"></div>
-      </div>
-    </div>
-  `).join('');
-}
-
-// Update expense categories dropdown
-function updateExpenseCategories() {
-  const expenseCategory = document.getElementById('expense-category');
-  expenseCategory.innerHTML = '<option value="uncategorized">Uncategorized</option>' +
-    budgets.map(budget => `<option value="${budget.category}">${budget.category}</option>`).join('');
-}
-
-// Update history table
-function updateHistory() {
-  const historyTable = document.getElementById('history-table').getElementsByTagName('tbody')[0];
-  historyTable.innerHTML = '';
-
-  incomes.forEach(income => {
-    addHistoryRow('Income', income.description, income.amount, '');
-  });
-
-  expenses.forEach(expense => {
-    addHistoryRow('Expense', expense.description, expense.amount, expense.category);
-  });
-}
-
-// Add a row to the history table
-function addHistoryRow(type, description, amount, category) {
-  const historyTable = document.getElementById('history-table').getElementsByTagName('tbody')[0];
-  const row = historyTable.insertRow();
-  row.innerHTML = `
-    <td>${type}</td>
-    <td>${description}</td>
-    <td>${amount.toFixed(2)}</td>
-    <td>${category}</td>
-    <td class="actions">
-      <button class="edit" onclick="editEntry(this)">Edit</button>
-      <button onclick="deleteEntry(this)">Delete</button>
-    </td>
-  `;
 }
