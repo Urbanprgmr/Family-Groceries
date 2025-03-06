@@ -121,21 +121,24 @@ function updateSummary() {
 // Update budget list
 function updateBudgetList() {
   const budgetList = document.getElementById('budget-list');
-  budgetList.innerHTML = budgets.map((budget, index) => `
-    <div class="budget-item">
-      <div>
-        <strong>${budget.category}</strong>
-        <p>Total: ${budget.amount.toFixed(2)} MVR | Remaining: ${budget.remaining.toFixed(2)} MVR</p>
+  budgetList.innerHTML = budgets
+    .map(
+      (budget, index) => `
+      <div class="budget-item">
+        <h3>${budget.category}</h3>
+        <p>Total: ${budget.amount.toFixed(2)} MVR</p>
+        <p>Remaining: ${budget.remaining.toFixed(2)} MVR</p>
         <div class="progress-bar">
           <div class="progress" style="width: ${(budget.remaining / budget.amount) * 100}%"></div>
         </div>
+        <div class="actions">
+          <button class="edit" onclick="editBudget(${index})">Edit</button>
+          <button class="delete" onclick="deleteBudget(${index})">Delete</button>
+        </div>
       </div>
-      <div class="actions">
-        <button class="edit" onclick="editBudget(${index})">Edit</button>
-        <button onclick="deleteBudget(${index})">Delete</button>
-      </div>
-    </div>
-  `).join('');
+    `
+    )
+    .join('');
 }
 
 // Update expense categories dropdown
