@@ -47,6 +47,14 @@ function setBudget(e) {
   e.preventDefault();
   const category = document.getElementById('budget-category').value;
   const amount = parseFloat(document.getElementById('budget-amount').value);
+
+  // Check if the budget category already exists
+  const existingBudget = budgets.find(b => b.category === category);
+  if (existingBudget) {
+    alert('Budget category already exists. Please choose a different name.');
+    return;
+  }
+
   budgets.push({ category, amount, remaining: amount });
   saveData();
   updateBudgetList();
