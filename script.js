@@ -169,7 +169,7 @@ function exportCSV() {
     document.body.removeChild(link);
 }
 
-// Load existing data on startup
+// Ensure data is loaded on page refresh
 updateItemsTable();
 updateItemDropdown();
 updateMembersTable();
